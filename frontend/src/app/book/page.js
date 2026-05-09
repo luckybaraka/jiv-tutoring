@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   User,
   Users,
@@ -14,10 +14,48 @@ import {
   Trash2,
   Sparkles,
   PartyPopper,
+  Globe2,
+  AlertCircle,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { api } from '@/lib/api';
+
+const SESSION_DURATION_MINUTES = 45;
+
+/** Detect the visitor's IANA timezone (e.g. "Africa/Nairobi", "America/New_York"). */
+function detectTimezone() {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Africa/Nairobi';
+  } catch {
+    return 'Africa/Nairobi';
+  }
+}
+
+/**
+ * Combine local "YYYY-MM-DD" date and "HH:MM" time into a UTC ISO string.
+ * The Date constructor interprets `YYYY-MM-DDTHH:MM:SS` in the browser's
+ * local timezone (which IS the user's timezone), so toISOString() gives the
+ * correct absolute instant.
+ */
+function toUtcIso(date, time) {
+  if (!date || !time) return '';
+  const d = new Date(`${date}T${time}:00`);
+  return isNaN(d.getTime()) ? '' : d.toISOString();
+}
+
+function formatTzOffset(timezone) {
+  try {
+    const parts = new Intl.DateTimeFormat('en-GB', {
+      timeZone: timezone,
+      timeZoneName: 'shortOffset',
+    }).formatToParts(new Date());
+    const tz = parts.find((p) => p.type === 'timeZoneName')?.value;
+    return tz || '';
+  } catch {
+    return '';
+  }
+}
 
 const SUBJECT_OPTIONS = {
   CBC: [
@@ -26,8 +64,16 @@ const SUBJECT_OPTIONS = {
     'Kiswahili',
     'Science & Technology',
     'Social Studies',
-    'Religious Education',
     'Creative Arts',
+  ],
+  CBE: [
+    'Mathematics',
+    'English',
+    'Kiswahili',
+    'Integrated Science',
+    'Social Studies',
+    'Creative Arts',
+    'Pre-Technical Studies',
   ],
   IGCSE: [
     'Mathematics',
@@ -44,17 +90,63 @@ const SUBJECT_OPTIONS = {
     'Geography',
     'History',
   ],
+  GCSE: [
+    'Mathematics',
+    'English Language',
+    'English Literature',
+    'Biology',
+    'Chemistry',
+    'Physics',
+    'Combined Science',
+    'Computer Science',
+    'Geography',
+    'History',
+    'Business',
+  ],
+  'MYP/IB': [
+    'Mathematics',
+    'Language & Literature',
+    'Language Acquisition',
+    'Sciences',
+    'Individuals & Societies',
+    'Design',
+    'Arts',
+    'Theory of Knowledge',
+    'Extended Essay Support',
+  ],
+  American: [
+    'Mathematics (Algebra, Geometry, Calculus)',
+    'English / Language Arts',
+    'Biology',
+    'Chemistry',
+    'Physics',
+    'World History',
+    'US History',
+    'Economics',
+    'Computer Science',
+    'SAT / ACT Prep',
+  ],
 };
 
-const TIME_SLOTS = [
-  '08:00', '09:00', '10:00', '11:00', '12:00',
-  '14:00', '15:00', '16:00', '17:00',
-];
+const CURRICULUM_LABELS = {
+  CBC: 'Competency-Based Curriculum (KE)',
+  CBE: 'Competency-Based Education (KE)',
+  IGCSE: 'Cambridge International',
+  GCSE: 'General Certificate (UK)',
+  'MYP/IB': 'International Baccalaureate',
+  American: 'US Curriculum',
+};
 
 export default function BookPage() {
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [completedBooking, setCompletedBooking] = useState(null);
+
+  const [timezone, setTimezone] = useState('Africa/Nairobi');
+  const [availability, setAvailability] = useState({
+    state: 'idle', // idle | checking | available | conflict | error
+    conflict: null,
+  });
 
   const [data, setData] = useState({
     sessionType: 'INDIVIDUAL',
@@ -66,6 +158,57 @@ export default function BookPage() {
     timeSlot: '',
     notes: '',
   });
+
+  // Detect timezone on mount (client-only).
+  useEffect(() => {
+    setTimezone(detectTimezone());
+  }, []);
+
+  const tzOffsetLabel = useMemo(() => formatTzOffset(timezone), [timezone]);
+
+  // Live availability check — debounced — when both date and time are set.
+  const availabilityTimer = useRef(null);
+  useEffect(() => {
+    if (step !== 4) return;
+    if (!data.scheduledDate || !data.timeSlot) {
+      setAvailability({ state: 'idle', conflict: null });
+      return;
+    }
+    const startAt = toUtcIso(data.scheduledDate, data.timeSlot);
+    if (!startAt) {
+      setAvailability({ state: 'idle', conflict: null });
+      return;
+    }
+    if (new Date(startAt) <= new Date()) {
+      setAvailability({ state: 'idle', conflict: null });
+      return;
+    }
+
+    setAvailability({ state: 'checking', conflict: null });
+    if (availabilityTimer.current) clearTimeout(availabilityTimer.current);
+    availabilityTimer.current = setTimeout(async () => {
+      try {
+        const res = await api.checkAvailability({
+          startAt,
+          durationMinutes: SESSION_DURATION_MINUTES,
+        });
+        if (res?.data?.available) {
+          setAvailability({ state: 'available', conflict: null });
+        } else {
+          setAvailability({
+            state: 'conflict',
+            conflict: res?.data?.conflict || null,
+          });
+        }
+      } catch {
+        setAvailability({ state: 'error', conflict: null });
+      }
+    }, 350);
+
+    return () => {
+      if (availabilityTimer.current) clearTimeout(availabilityTimer.current);
+    };
+  }, [data.scheduledDate, data.timeSlot, step]);
 
   // Helpers
   const updateParent = (field, value) =>
@@ -176,6 +319,12 @@ export default function BookPage() {
         toast.error('Please pick a future date and time');
         return false;
       }
+      if (availability.state === 'conflict') {
+        toast.error(
+          'That time overlaps an existing booking. Please pick another time.'
+        );
+        return false;
+      }
     }
     return true;
   };
@@ -190,6 +339,7 @@ export default function BookPage() {
     if (!validateStep()) return;
     setSubmitting(true);
     try {
+      const startAt = toUtcIso(data.scheduledDate, data.timeSlot);
       const payload = {
         parent: data.parent,
         students: data.students.map((s) => ({
@@ -199,8 +349,9 @@ export default function BookPage() {
         sessionType: data.sessionType,
         curriculum: data.curriculum,
         subjects: data.subjects,
-        scheduledDate: new Date(`${data.scheduledDate}T${data.timeSlot}:00`).toISOString(),
-        timeSlot: { startTime: data.timeSlot, durationMinutes: 45 },
+        startAt,
+        timezone,
+        durationMinutes: SESSION_DURATION_MINUTES,
         notes: data.notes,
         isFreeTrialed: true,
       };
@@ -248,12 +399,19 @@ export default function BookPage() {
               </p>
               <p className="text-sm text-navy-700 mt-1">
                 <strong>Date:</strong>{' '}
-                {new Date(completedBooking.scheduledDate).toLocaleDateString('en-KE', {
-                  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+                {new Date(completedBooking.startAt || completedBooking.scheduledDate).toLocaleDateString('en-KE', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  timeZone: completedBooking.timezone || undefined,
                 })}
               </p>
               <p className="text-sm text-navy-700 mt-1">
                 <strong>Time:</strong> {completedBooking.timeSlot.startTime} – {completedBooking.timeSlot.endTime}
+                {completedBooking.timezone && (
+                  <span className="text-navy-500"> · {completedBooking.timezone}</span>
+                )}
               </p>
             </div>
 
@@ -393,25 +551,26 @@ export default function BookPage() {
                     Which curriculum?
                   </h2>
                   <p className="text-navy-600 mb-6">
-                    Pick the curriculum your child is enrolled in.
+                    Pick the curriculum your child is enrolled in. We support
+                    all major systems.
                   </p>
 
-                  <div className="grid gap-4 md:grid-cols-2">
-                    {['CBC', 'IGCSE'].map((curr) => (
+                  <div className="grid gap-3 grid-cols-2 md:grid-cols-3">
+                    {Object.keys(SUBJECT_OPTIONS).map((curr) => (
                       <button
                         key={curr}
                         type="button"
                         onClick={() => setData((d) => ({ ...d, curriculum: curr, subjects: [] }))}
-                        className={`rounded-2xl border-2 p-5 transition-all ${
+                        className={`rounded-2xl border-2 p-4 transition-all ${
                           data.curriculum === curr
                             ? 'border-gold-400 bg-gold-50 shadow-md'
                             : 'border-navy-100 hover:border-gold-200'
                         }`}
                       >
-                        <GraduationCap className="h-7 w-7 text-gold-500 mx-auto mb-2" />
-                        <p className="font-display font-bold text-2xl text-navy-900">{curr}</p>
-                        <p className="text-xs text-navy-500 mt-1">
-                          {curr === 'CBC' ? 'Competency-Based Curriculum' : 'International Cambridge'}
+                        <GraduationCap className="h-6 w-6 text-gold-500 mx-auto mb-2" />
+                        <p className="font-display font-bold text-lg text-navy-900">{curr}</p>
+                        <p className="text-[11px] text-navy-500 mt-1 leading-tight">
+                          {CURRICULUM_LABELS[curr]}
                         </p>
                       </button>
                     ))}
@@ -607,42 +766,166 @@ export default function BookPage() {
                     When works for you?
                   </h2>
                   <p className="text-navy-600">
-                    Free trial sessions are 45 minutes long. We'll confirm the slot within 24 hours.
+                    Free trial sessions are <strong>45 minutes</strong>. We are
+                    available <strong className="text-navy-900">24 hours a day</strong>
+                    — pick any time that suits your family.
                   </p>
                 </div>
 
-                <div>
-                  <label className="label-field flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-gold-500" />
-                    Preferred date *
-                  </label>
-                  <input
-                    type="date"
-                    className="input-field"
-                    min={new Date(Date.now() + 86400000).toISOString().split('T')[0]}
-                    value={data.scheduledDate}
-                    onChange={(e) => setData((d) => ({ ...d, scheduledDate: e.target.value }))}
-                  />
+                <div className="flex items-center gap-3 rounded-xl border-2 border-gold-200 bg-gold-50 p-3 text-sm">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gold-gradient flex-shrink-0">
+                    <Globe2 className="h-4 w-4 text-navy-900" strokeWidth={2.5} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-bold text-navy-900">
+                      Times shown in your local timezone
+                    </p>
+                    <p className="text-navy-600 text-xs">
+                      <span className="font-mono font-semibold">{timezone}</span>
+                      {tzOffsetLabel && (
+                        <span className="text-navy-500"> · {tzOffsetLabel}</span>
+                      )}
+                      {' '}— we'll book it as the absolute moment in time, so
+                      your tutor sees it in their zone too.
+                    </p>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="label-field">Preferred time *</label>
-                  <div className="grid gap-2 grid-cols-3 sm:grid-cols-5">
-                    {TIME_SLOTS.map((slot) => (
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <label className="label-field flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-gold-500" />
+                      Preferred date *
+                    </label>
+                    <input
+                      type="date"
+                      className="input-field"
+                      min={new Date(Date.now() + 86400000).toISOString().split('T')[0]}
+                      value={data.scheduledDate}
+                      onChange={(e) => setData((d) => ({ ...d, scheduledDate: e.target.value }))}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="label-field">Preferred time *</label>
+                    <input
+                      type="time"
+                      className="input-field"
+                      value={data.timeSlot}
+                      onChange={(e) => setData((d) => ({ ...d, timeSlot: e.target.value }))}
+                    />
+                    <p className="text-xs text-navy-500 mt-1">
+                      Any time works — we operate around the clock.
+                    </p>
+                  </div>
+                </div>
+
+                {data.scheduledDate && data.timeSlot && (() => {
+                  const startIso = toUtcIso(data.scheduledDate, data.timeSlot);
+                  if (!startIso) return null;
+                  const endLocal = new Date(
+                    new Date(startIso).getTime() + SESSION_DURATION_MINUTES * 60 * 1000
+                  );
+                  const endTimeLocal = endLocal.toLocaleTimeString('en-GB', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hourCycle: 'h23',
+                  });
+                  const formatConflictTime = (iso) =>
+                    new Date(iso).toLocaleTimeString('en-GB', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hourCycle: 'h23',
+                    });
+
+                  let panelClasses =
+                    'rounded-xl border-2 p-3 flex items-start gap-3 text-sm';
+                  let icon = <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />;
+                  let title = 'This slot is open';
+                  let body = (
+                    <>
+                      Your session: <strong>{data.timeSlot}</strong> →{' '}
+                      <strong>{endTimeLocal}</strong> ({SESSION_DURATION_MINUTES} min) in {timezone}.
+                    </>
+                  );
+
+                  if (availability.state === 'checking') {
+                    panelClasses += ' border-navy-200 bg-navy-50/50 text-navy-700';
+                    icon = (
+                      <Loader2 className="h-5 w-5 text-navy-500 mt-0.5 flex-shrink-0 animate-spin" />
+                    );
+                    title = 'Checking availability...';
+                    body = (
+                      <>
+                        Your session would run <strong>{data.timeSlot}</strong> →{' '}
+                        <strong>{endTimeLocal}</strong> ({SESSION_DURATION_MINUTES} min) in {timezone}.
+                      </>
+                    );
+                  } else if (availability.state === 'available') {
+                    panelClasses += ' border-green-200 bg-green-50 text-green-800';
+                  } else if (availability.state === 'conflict') {
+                    panelClasses += ' border-red-200 bg-red-50 text-red-800';
+                    icon = <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />;
+                    title = 'That time overlaps an existing booking';
+                    const c = availability.conflict;
+                    body = c ? (
+                      <>
+                        Our tutor is occupied from{' '}
+                        <strong>{formatConflictTime(c.startAt)}</strong> to{' '}
+                        <strong>{formatConflictTime(c.endAt)}</strong> (your time).
+                        Please pick a non-overlapping slot.
+                      </>
+                    ) : (
+                      <>
+                        Please pick a different start time — overlaps an existing
+                        session.
+                      </>
+                    );
+                  } else if (availability.state === 'error') {
+                    panelClasses += ' border-yellow-200 bg-yellow-50 text-yellow-800';
+                    icon = <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />;
+                    title = "Couldn't check availability";
+                    body = (
+                      <>
+                        We'll re-check when you submit. Your session: {data.timeSlot} → {endTimeLocal}.
+                      </>
+                    );
+                  } else {
+                    panelClasses += ' border-navy-100 bg-navy-50/50 text-navy-700';
+                    icon = (
+                      <Calendar className="h-5 w-5 text-gold-500 mt-0.5 flex-shrink-0" />
+                    );
+                    title = 'Session preview';
+                  }
+
+                  return (
+                    <div className={panelClasses}>
+                      {icon}
+                      <div className="flex-1">
+                        <p className="font-bold">{title}</p>
+                        <p className="text-xs mt-0.5">{body}</p>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                <div className="rounded-xl bg-navy-50/50 border border-navy-100 p-3 flex items-center gap-3 text-sm text-navy-700">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gold-gradient flex-shrink-0">
+                    <Calendar className="h-4 w-4 text-navy-900" strokeWidth={2.5} />
+                  </div>
+                  <span>
+                    Quick picks:&nbsp;
+                    {['08:00', '14:00', '18:00', '21:00'].map((q, i, arr) => (
                       <button
-                        key={slot}
+                        key={q}
                         type="button"
-                        onClick={() => setData((d) => ({ ...d, timeSlot: slot }))}
-                        className={`rounded-xl border-2 px-3 py-2.5 text-sm font-bold transition-all ${
-                          data.timeSlot === slot
-                            ? 'border-gold-400 bg-gold-gradient text-navy-900 shadow-gold'
-                            : 'border-navy-200 bg-white text-navy-700 hover:border-gold-300'
-                        }`}
+                        onClick={() => setData((d) => ({ ...d, timeSlot: q }))}
+                        className="text-gold-700 hover:text-gold-800 font-bold underline-offset-2 hover:underline"
                       >
-                        {slot}
+                        {q}{i < arr.length - 1 ? ' · ' : ''}
                       </button>
                     ))}
-                  </div>
+                  </span>
                 </div>
 
                 <div>

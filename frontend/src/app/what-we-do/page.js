@@ -17,7 +17,7 @@ import {
 export const metadata = {
   title: 'What We Do — Tutoring Services & Subjects',
   description:
-    'Online tutoring, homeschooling, group sessions, homework help and special needs support — for CBC and IGCSE students across Kenya.',
+    'Online tutoring, homeschooling, group sessions, homework help and special needs support — across CBC, CBE, IGCSE, GCSE, MYP/IB and American curricula. Available 24/7.',
 };
 
 const services = [
@@ -25,7 +25,7 @@ const services = [
     icon: BookOpen,
     title: 'Homeschooling Support',
     desc: 'Full curriculum delivery for families who choose to educate at home. Structured lesson plans, regular assessments, and a teacher who walks the journey with you.',
-    features: ['Full CBC or IGCSE coverage', 'Daily/weekly schedule design', 'Progress tracking', 'Parent reports'],
+    features: ['CBC, CBE, IGCSE, GCSE, MYP/IB or American', 'Daily/weekly schedule design', 'Progress tracking', 'Parent reports'],
   },
   {
     icon: HeartHandshake,
@@ -137,64 +137,115 @@ export default function WhatWeDoPage() {
 
       {/* CURRICULA */}
       <section className="section-padding bg-navy-50/30">
-        <div className="container-custom max-w-5xl">
+        <div className="container-custom max-w-6xl">
           <div className="text-center mb-12">
             <p className="text-gold-600 font-bold uppercase tracking-wider text-sm mb-3">
               Curricula We Cover
             </p>
             <h2 className="font-display text-3xl md:text-4xl font-extrabold text-navy-900">
-              CBC <span className="text-gold-500">&</span> IGCSE — Done Right
+              Every Major Curriculum, <span className="gradient-text">Done Right</span>
             </h2>
+            <p className="mt-4 max-w-2xl mx-auto text-navy-600 text-lg">
+              From local Kenyan systems to international standards — our
+              tutors are certified across the curricula that matter to your
+              family.
+            </p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="rounded-2xl bg-hero-gradient text-white p-8 relative overflow-hidden shadow-navy">
-              <div className="absolute inset-0 bg-sparkle" />
-              <div className="relative">
-                <div className="inline-flex items-center gap-2 rounded-full bg-gold-400/20 px-3 py-1 text-xs font-bold text-gold-300 border border-gold-400/30 mb-4">
-                  KENYAN CURRICULUM
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                code: 'CBC',
+                tag: 'KENYA',
+                desc: 'Competency-Based Curriculum support for PP1 through Grade 9 and beyond — aligned to learning areas, core competencies, and formative assessments.',
+                subjects: ['Mathematics', 'English', 'Kiswahili', 'Sciences & Tech', 'Social Studies'],
+                dark: true,
+              },
+              {
+                code: 'CBE',
+                tag: 'KENYA',
+                desc: 'Competency-Based Education — the evolved Kenyan framework focused on senior school pathways and integrated, real-world learning.',
+                subjects: ['Mathematics', 'English', 'Kiswahili', 'Integrated Science', 'Pre-Technical'],
+              },
+              {
+                code: 'IGCSE',
+                tag: 'INTERNATIONAL',
+                desc: 'Cambridge IGCSE preparation that goes beyond memorisation — structured writing, exam technique, and deep subject mastery.',
+                subjects: ['Maths (Core/Extended)', 'English (1st & 2nd Lang.)', 'Sciences', 'ICT & CS', 'Business & Econ'],
+                dark: true,
+              },
+              {
+                code: 'GCSE',
+                tag: 'UK',
+                desc: 'UK General Certificate of Secondary Education — full coverage with mock exams, mark-scheme alignment, and topic-by-topic mastery.',
+                subjects: ['Mathematics', 'English Language & Lit.', 'Sciences', 'Computer Science', 'History & Geography'],
+              },
+              {
+                code: 'MYP / IB',
+                tag: 'INTERNATIONAL',
+                desc: 'International Baccalaureate Middle Years and Diploma — inquiry-based learning, ToK, Extended Essay coaching, and CAS guidance.',
+                subjects: ['Lang. & Literature', 'Sciences', 'Individuals & Societies', 'Mathematics', 'Theory of Knowledge'],
+                dark: true,
+              },
+              {
+                code: 'American',
+                tag: 'USA',
+                desc: 'US Curriculum K–12 plus AP courses, SAT and ACT preparation. Built for students applying to colleges in the United States.',
+                subjects: ['Algebra · Geometry · Calculus', 'English / Language Arts', 'Sciences (Bio, Chem, Phys)', 'US & World History', 'SAT / ACT Prep'],
+              },
+            ].map((c) => (
+              <div
+                key={c.code}
+                className={`rounded-2xl p-7 relative overflow-hidden ${
+                  c.dark
+                    ? 'bg-hero-gradient text-white shadow-navy'
+                    : 'bg-gradient-to-br from-gold-50 to-white border-2 border-gold-200'
+                }`}
+              >
+                {c.dark && <div className="absolute inset-0 bg-sparkle" />}
+                <div className="relative">
+                  <div
+                    className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[10px] font-bold mb-4 ${
+                      c.dark
+                        ? 'bg-gold-400/20 text-gold-300 border border-gold-400/30'
+                        : 'bg-navy-700 text-gold-300'
+                    }`}
+                  >
+                    {c.tag}
+                  </div>
+                  <h3
+                    className={`font-display text-2xl font-extrabold mb-3 ${
+                      c.dark ? 'text-gold-300' : 'text-navy-900'
+                    }`}
+                  >
+                    {c.code}
+                  </h3>
+                  <p
+                    className={`mb-4 leading-relaxed text-sm ${
+                      c.dark ? 'text-navy-100' : 'text-navy-700'
+                    }`}
+                  >
+                    {c.desc}
+                  </p>
+                  <ul
+                    className={`space-y-1.5 text-xs ${
+                      c.dark ? 'text-navy-100' : 'text-navy-700'
+                    }`}
+                  >
+                    {c.subjects.map((s) => (
+                      <li key={s} className="flex items-center gap-2">
+                        <CheckCircle2
+                          className={`h-3.5 w-3.5 flex-shrink-0 ${
+                            c.dark ? 'text-gold-400' : 'text-gold-600'
+                          }`}
+                        />
+                        {s}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <h3 className="font-display text-3xl font-extrabold mb-3 text-gold-300">
-                  CBC
-                </h3>
-                <p className="text-navy-100 mb-4 leading-relaxed">
-                  Competency-Based Curriculum support for PP1 through Grade 9
-                  and beyond. Our tutors understand the CBC framework deeply
-                  and align lessons to learning areas, core competencies, and
-                  formative assessments.
-                </p>
-                <ul className="space-y-2 text-sm text-navy-100">
-                  {['Mathematics', 'English', 'Kiswahili', 'Sciences & Technology', 'Social Studies'].map((s) => (
-                    <li key={s} className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-gold-400" />
-                      {s}
-                    </li>
-                  ))}
-                </ul>
               </div>
-            </div>
-
-            <div className="rounded-2xl bg-gradient-to-br from-gold-100 to-white border-2 border-gold-300 p-8 relative overflow-hidden">
-              <div className="inline-flex items-center gap-2 rounded-full bg-navy-700 px-3 py-1 text-xs font-bold text-gold-300 mb-4">
-                INTERNATIONAL CURRICULUM
-              </div>
-              <h3 className="font-display text-3xl font-extrabold mb-3 text-navy-900">
-                IGCSE
-              </h3>
-              <p className="text-navy-700 mb-4 leading-relaxed">
-                Cambridge IGCSE preparation that goes beyond memorization. We
-                develop the critical thinking, structured writing, and exam
-                technique your child needs to excel internationally.
-              </p>
-              <ul className="space-y-2 text-sm text-navy-700">
-                {['Mathematics (Core / Extended)', 'English (First & Second Lang.)', 'Sciences (Biology, Chemistry, Physics)', 'ICT & Computer Science', 'Business & Economics'].map((s) => (
-                  <li key={s} className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-gold-600" />
-                    {s}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            ))}
           </div>
         </div>
       </section>

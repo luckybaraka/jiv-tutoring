@@ -11,15 +11,20 @@ export const metadata = {
     template: '%s | JIV Tutoring Services',
   },
   description:
-    'Personalized online tutoring and homeschooling support for CBC and IGCSE students in Kenya. Certified, caring teachers led by Joan Theresa. Book a FREE 45-minute trial today.',
+    'Personalized online tutoring and homeschooling support for CBC, CBE, IGCSE, GCSE, MYP/IB and American curriculum students. Certified, caring teachers available 24/7. Book a FREE 45-minute trial today.',
   keywords: [
     'homeschooling Kenya',
     'online tutoring CBC',
+    'CBE tutor Kenya',
     'IGCSE tutor Kenya',
+    'GCSE tutor',
+    'IB MYP tutor',
+    'American curriculum tutor',
     'private tutor Kenya',
     'homework help Nairobi',
     'special needs learning support',
     'group tutoring Kenya',
+    '24/7 online tutoring',
     'JIV Tutoring',
   ],
   authors: [{ name: 'JIV Tutoring Services' }],
@@ -29,7 +34,7 @@ export const metadata = {
     locale: 'en_KE',
     title: 'JIV Tutoring Services | Online Tutoring & Homeschooling',
     description:
-      'Certified, caring teachers helping your child learn with confidence. CBC, IGCSE, homeschooling and special needs support.',
+      'Certified, caring teachers helping your child learn with confidence — across CBC, CBE, IGCSE, GCSE, MYP/IB and American curricula. Homeschooling and special needs support, available 24/7.',
     siteName: 'JIV Tutoring Services',
   },
   twitter: {
@@ -56,10 +61,10 @@ export default function RootLayout({ children }) {
     '@type': 'EducationalOrganization',
     name: 'JIV Tutoring Services',
     description:
-      'Personalized online tutoring and homeschooling support for CBC and IGCSE students in Kenya.',
+      'Personalized online tutoring and homeschooling support for CBC, CBE, IGCSE, GCSE, MYP/IB and American curriculum students. Available 24/7.',
     url: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
     telephone: '+254726555444',
-    email: 'joantheresa26@gmail.com',
+    email: 'info@jivtutoring.com',
     address: {
       '@type': 'PostalAddress',
       addressCountry: 'KE',

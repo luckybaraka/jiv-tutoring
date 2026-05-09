@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import {
   GraduationCap, LogOut, RefreshCw, Loader2,
   CheckCircle2, XCircle, Clock, BookOpen, Users, User,
-  Mail, Phone, Calendar, Trophy, AlertCircle,
+  Mail, Phone, Calendar, Trophy, AlertCircle, Trash2,
+  Download, TrendingUp, Globe2, Ban, UserCheck, Sparkles,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { api } from '@/lib/api';
@@ -22,10 +23,15 @@ export default function AdminDashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [bookings, setBookings] = useState([]);
-  const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0, completed: 0 });
+  const [stats, setStats] = useState({
+    total: 0, pending: 0, approved: 0, completed: 0,
+    rejected: 0, cancelled: 0, individual: 0, group: 0,
+    last30Days: 0, totalStudents: 0, byCurriculum: {},
+  });
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('ALL');
   const [acting, setActing] = useState(null);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -48,7 +54,7 @@ export default function AdminDashboardPage() {
         api.adminStats(),
       ]);
       setBookings(bookingsRes.data || []);
-      setStats(statsRes.data || stats);
+      setStats((prev) => ({ ...prev, ...(statsRes.data || {}) }));
     } catch (err) {
       if (err.message.includes('Unauthorized') || err.message.includes('Invalid')) {
         localStorage.removeItem('jiv_admin_token');
@@ -76,7 +82,17 @@ export default function AdminDashboardPage() {
         await api.adminReject(id, reason);
       } else if (action === 'complete') await api.adminComplete(id);
       else if (action === 'cancel') await api.adminCancel(id);
-      toast.success(`Booking ${action}d`);
+      else if (action === 'delete') {
+        const ok = window.confirm(
+          'Permanently delete this booking? This cannot be undone.'
+        );
+        if (!ok) {
+          setActing(null);
+          return;
+        }
+        await api.adminDelete(id);
+      }
+      toast.success(`Booking ${action}${action === 'delete' ? 'd' : 'd'}`);
       await loadAll();
     } catch (err) {
       toast.error(err.message);
@@ -85,12 +101,70 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const filters = filter === 'ALL' ? {} : { status: filter };
+      const filename = await api.adminExportExcel(filters);
+      toast.success(`Downloaded ${filename}`);
+    } catch (err) {
+      toast.error(err.message || 'Export failed');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const filtered = filter === 'ALL' ? bookings : bookings.filter((b) => b.status === filter);
+
+  const adminTimezone =
+    typeof window !== 'undefined'
+      ? Intl.DateTimeFormat().resolvedOptions().timeZone || 'Africa/Nairobi'
+      : 'Africa/Nairobi';
 
   const formatDate = (iso) =>
     new Date(iso).toLocaleDateString('en-KE', {
       year: 'numeric', month: 'short', day: 'numeric',
+      timeZone: adminTimezone,
     });
+
+  const formatTimeRange = (b) => {
+    if (b.startAt && b.endAt) {
+      const start = new Date(b.startAt).toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23',
+        timeZone: adminTimezone,
+      });
+      const end = new Date(b.endAt).toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23',
+        timeZone: adminTimezone,
+      });
+      return `${start}–${end}`;
+    }
+    return `${b.timeSlot?.startTime || ''}–${b.timeSlot?.endTime || ''}`;
+  };
+
+  const primaryStats = [
+    { label: 'Total', value: stats.total, icon: BookOpen, color: 'from-navy-500 to-navy-700' },
+    { label: 'Pending', value: stats.pending, icon: Clock, color: 'from-yellow-500 to-yellow-600' },
+    { label: 'Approved', value: stats.approved, icon: CheckCircle2, color: 'from-green-500 to-green-600' },
+    { label: 'Completed', value: stats.completed, icon: Trophy, color: 'from-blue-500 to-blue-600' },
+  ];
+
+  const secondaryStats = [
+    { label: 'Rejected', value: stats.rejected, icon: XCircle, accent: 'text-red-600' },
+    { label: 'Cancelled', value: stats.cancelled, icon: Ban, accent: 'text-gray-600' },
+    { label: 'Individual', value: stats.individual, icon: User, accent: 'text-navy-600' },
+    { label: 'Group', value: stats.group, icon: Users, accent: 'text-gold-600' },
+    { label: 'Last 30 days', value: stats.last30Days, icon: TrendingUp, accent: 'text-green-600' },
+    { label: 'Students', value: stats.totalStudents, icon: UserCheck, accent: 'text-blue-600' },
+  ];
+
+  const curriculumEntries = Object.entries(stats.byCurriculum || {}).sort(
+    (a, b) => b[1] - a[1]
+  );
 
   return (
     <div className="min-h-screen">
@@ -107,6 +181,18 @@ export default function AdminDashboardPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={handleExport}
+              disabled={exporting || loading}
+              className="rounded-lg bg-white/10 hover:bg-white/20 px-3 py-2 text-sm font-semibold flex items-center gap-2 disabled:opacity-50"
+            >
+              {exporting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              <span className="hidden sm:inline">Export Excel</span>
+            </button>
             <button
               onClick={loadAll}
               className="rounded-lg bg-white/10 hover:bg-white/20 px-3 py-2 text-sm font-semibold flex items-center gap-2"
@@ -126,14 +212,9 @@ export default function AdminDashboardPage() {
       </header>
 
       <div className="container-custom py-8">
-        {/* STATS */}
-        <div className="grid gap-4 md:grid-cols-4 mb-8">
-          {[
-            { label: 'Total', value: stats.total, icon: BookOpen, color: 'from-navy-500 to-navy-700' },
-            { label: 'Pending', value: stats.pending, icon: Clock, color: 'from-yellow-500 to-yellow-600' },
-            { label: 'Approved', value: stats.approved, icon: CheckCircle2, color: 'from-green-500 to-green-600' },
-            { label: 'Completed', value: stats.completed, icon: Trophy, color: 'from-blue-500 to-blue-600' },
-          ].map((s) => (
+        {/* PRIMARY STATS */}
+        <div className="grid gap-4 md:grid-cols-4 mb-4">
+          {primaryStats.map((s) => (
             <div key={s.label} className="rounded-2xl bg-white p-5 shadow-sm border border-navy-100">
               <div className="flex items-start justify-between">
                 <div>
@@ -150,21 +231,80 @@ export default function AdminDashboardPage() {
           ))}
         </div>
 
-        {/* FILTERS */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          {['ALL', 'PENDING', 'APPROVED', 'COMPLETED', 'REJECTED', 'CANCELLED'].map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`rounded-full px-4 py-2 text-sm font-bold transition-colors ${
-                filter === f
-                  ? 'bg-gold-gradient text-navy-900 shadow-gold'
-                  : 'bg-white text-navy-700 border border-navy-200 hover:bg-navy-50'
-              }`}
+        {/* SECONDARY STATS */}
+        <div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-6 mb-4">
+          {secondaryStats.map((s) => (
+            <div
+              key={s.label}
+              className="rounded-xl bg-white p-3 border border-navy-100 flex items-center gap-3"
             >
-              {f}
-            </button>
+              <s.icon className={`h-5 w-5 ${s.accent} flex-shrink-0`} />
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-navy-500">
+                  {s.label}
+                </p>
+                <p className="text-lg font-extrabold text-navy-900 leading-tight">
+                  {s.value}
+                </p>
+              </div>
+            </div>
           ))}
+        </div>
+
+        {/* CURRICULUM BREAKDOWN */}
+        {curriculumEntries.length > 0 && (
+          <div className="rounded-2xl bg-white border border-navy-100 p-5 mb-8">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Globe2 className="h-5 w-5 text-gold-600" />
+                <p className="text-xs font-bold uppercase tracking-wider text-navy-500">
+                  Bookings by Curriculum
+                </p>
+              </div>
+              <p className="text-xs text-navy-500">{stats.total} total</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {curriculumEntries.map(([code, count]) => {
+                const pct = stats.total ? Math.round((count / stats.total) * 100) : 0;
+                return (
+                  <div
+                    key={code}
+                    className="flex items-center gap-2 rounded-full bg-gold-50 border border-gold-200 px-3 py-1.5"
+                  >
+                    <span className="font-display font-extrabold text-sm text-navy-900">
+                      {code}
+                    </span>
+                    <span className="text-xs text-navy-600">
+                      {count} · {pct}%
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* FILTERS */}
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <div className="flex flex-wrap gap-2">
+            {['ALL', 'PENDING', 'APPROVED', 'COMPLETED', 'REJECTED', 'CANCELLED'].map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`rounded-full px-4 py-2 text-sm font-bold transition-colors ${
+                  filter === f
+                    ? 'bg-gold-gradient text-navy-900 shadow-gold'
+                    : 'bg-white text-navy-700 border border-navy-200 hover:bg-navy-50'
+                }`}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-navy-500 inline-flex items-center gap-1">
+            <Sparkles className="h-3 w-3 text-gold-500" />
+            Showing {filtered.length} of {bookings.length}
+          </p>
         </div>
 
         {/* BOOKINGS */}
@@ -189,7 +329,7 @@ export default function AdminDashboardPage() {
                   <div className="flex-1">
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div>
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="flex flex-wrap items-center gap-2 mb-1">
                           <span className={`inline-block rounded-full border px-2.5 py-0.5 text-xs font-bold ${STATUS_COLORS[b.status]}`}>
                             {b.status}
                           </span>
@@ -222,9 +362,20 @@ export default function AdminDashboardPage() {
                           {b.parent.phone}
                         </a>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <Calendar className="h-4 w-4 text-gold-500 flex-shrink-0" />
-                        {formatDate(b.scheduledDate)} · {b.timeSlot.startTime}–{b.timeSlot.endTime}
+                        <span>
+                          {formatDate(b.startAt || b.scheduledDate)} · {formatTimeRange(b)}
+                        </span>
+                        {b.timezone && b.timezone !== adminTimezone && (
+                          <span
+                            className="inline-flex items-center gap-1 rounded-full bg-navy-100 px-2 py-0.5 text-[10px] font-bold text-navy-700"
+                            title={`Booked from ${b.timezone}`}
+                          >
+                            <Globe2 className="h-2.5 w-2.5" />
+                            {b.timeSlot?.startTime} {b.timezone}
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center gap-2">
                         <BookOpen className="h-4 w-4 text-gold-500 flex-shrink-0" />
@@ -257,7 +408,7 @@ export default function AdminDashboardPage() {
                   </div>
 
                   {/* RIGHT: Actions */}
-                  <div className="flex flex-row lg:flex-col gap-2 lg:w-48">
+                  <div className="flex flex-row flex-wrap lg:flex-col gap-2 lg:w-48">
                     {b.status === 'PENDING' && (
                       <>
                         <button
@@ -298,6 +449,18 @@ export default function AdminDashboardPage() {
                         </button>
                       </>
                     )}
+                    <button
+                      onClick={() => handleAction(b.id, 'delete')}
+                      disabled={acting === b.id + 'delete'}
+                      className="flex-1 lg:flex-none inline-flex items-center justify-center gap-1.5 rounded-lg border-2 border-red-300 bg-white px-3 py-2 text-sm font-bold text-red-700 hover:bg-red-50 disabled:opacity-60"
+                    >
+                      {acting === b.id + 'delete' ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                      Delete
+                    </button>
                   </div>
                 </div>
               </div>

@@ -8,7 +8,11 @@ const SESSION_TYPES = Object.freeze({
 
 const CURRICULA = Object.freeze({
   CBC: 'CBC',
+  CBE: 'CBE',
   IGCSE: 'IGCSE',
+  GCSE: 'GCSE',
+  'MYP/IB': 'MYP/IB',
+  American: 'American',
 });
 
 const BOOKING_STATUSES = Object.freeze({
@@ -27,6 +31,9 @@ class Booking {
     sessionType,
     curriculum,
     subjects,
+    startAt,
+    endAt,
+    timezone = 'Africa/Nairobi',
     scheduledDate,
     timeSlot,
     notes = '',
@@ -41,7 +48,11 @@ class Booking {
     this.sessionType = sessionType;
     this.curriculum = curriculum;
     this.subjects = subjects;
-    this.scheduledDate = scheduledDate;
+    this.startAt = startAt instanceof Date ? startAt : new Date(startAt);
+    this.endAt = endAt instanceof Date ? endAt : new Date(endAt);
+    this.timezone = timezone;
+    // Legacy / display fields — kept in sync with startAt/endAt by the service.
+    this.scheduledDate = scheduledDate || this.startAt;
     this.timeSlot = timeSlot;
     this.notes = notes;
     this.isFreeTrialed = isFreeTrialed;
@@ -58,14 +69,15 @@ class Booking {
     }
 
     if (!Object.values(CURRICULA).includes(this.curriculum)) {
-      throw new ValidationError('Curriculum must be CBC or IGCSE');
+      throw new ValidationError(
+        'Curriculum must be one of: CBC, CBE, IGCSE, GCSE, MYP/IB, American'
+      );
     }
 
     if (!this.students || this.students.length === 0) {
       throw new ValidationError('At least one student is required');
     }
 
-    // Business rule: GROUP sessions must have 2 to 5 students
     if (this.sessionType === SESSION_TYPES.GROUP) {
       if (this.students.length < 2 || this.students.length > 5) {
         throw new ValidationError(
@@ -74,13 +86,22 @@ class Booking {
       }
     }
 
-    // Business rule: INDIVIDUAL sessions must have exactly 1 student
     if (this.sessionType === SESSION_TYPES.INDIVIDUAL && this.students.length !== 1) {
       throw new ValidationError('Individual sessions must have exactly 1 student');
     }
 
     if (!this.subjects || this.subjects.length === 0) {
       throw new ValidationError('At least one subject is required');
+    }
+
+    if (!(this.startAt instanceof Date) || isNaN(this.startAt.getTime())) {
+      throw new ValidationError('startAt must be a valid date');
+    }
+    if (!(this.endAt instanceof Date) || isNaN(this.endAt.getTime())) {
+      throw new ValidationError('endAt must be a valid date');
+    }
+    if (this.endAt <= this.startAt) {
+      throw new ValidationError('endAt must be after startAt');
     }
   }
 
@@ -136,6 +157,10 @@ class Booking {
       sessionType: this.sessionType,
       curriculum: this.curriculum,
       subjects: this.subjects,
+      startAt: this.startAt,
+      endAt: this.endAt,
+      timezone: this.timezone,
+      // Legacy/display fields
       scheduledDate: this.scheduledDate,
       timeSlot: this.timeSlot,
       notes: this.notes,

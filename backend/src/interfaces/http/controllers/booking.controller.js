@@ -27,6 +27,19 @@ class BookingController {
       next(err);
     }
   }
+
+  async checkAvailability(req, res, next) {
+    try {
+      const { startAt, durationMinutes } = req.query;
+      const result = await bookingService.checkAvailability({
+        startAt,
+        durationMinutes,
+      });
+      res.json({ success: true, data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
 module.exports = new BookingController();

@@ -14,8 +14,8 @@ SEO optimization, and a premium Blue + Yellow theme inspired by the brand flyer.
 | Route             | Description                                       |
 |-------------------|---------------------------------------------------|
 | `/`               | Homepage — hero, services, testimonials, CTA      |
-| `/about`          | About the team, led by Joan Theresa               |
-| `/what-we-do`     | Services, curricula (CBC + IGCSE), subjects       |
+| `/about`          | About the team and how we work                    |
+| `/what-we-do`     | Services, curricula (CBC, CBE, IGCSE, GCSE, IB, US), subjects |
 | `/news`           | Learning news — fetches from backend with fallback|
 | `/contact`        | Contact form + direct contact details             |
 | `/book`           | Multi-step booking wizard (under 2 minutes)       |
@@ -55,12 +55,12 @@ The `/news` page calls the backend `/api/news` endpoint:
 
 ## Booking Flow
 The booking wizard has **4 steps** + a success screen:
-1. **Session Type & Curriculum** — Individual or Group (2–5), CBC or IGCSE
+1. **Session Type & Curriculum** — Individual or Group (2–5), choose from CBC, CBE, IGCSE, GCSE, MYP/IB, American
 2. **Parent Details** — Name, email, Kenyan phone (validated)
 3. **Students & Subjects** — Up to 5 students, multi-select subjects
 4. **Schedule** — Date + time slot + optional notes
 
 Group sessions get an **automatic discount** preview (10/15/20/25% based on size).
 On submit, a POST to `/api/bookings` triggers parallel emails to:
-- The admin (`joantheresa26@gmail.com`)
+- The admin (`info@jivtutoring.com`)
 - The parent

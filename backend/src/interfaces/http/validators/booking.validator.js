@@ -23,16 +23,16 @@ const createBookingSchema = Joi.object({
   students: Joi.array().items(studentSchema).min(1).max(5).required(),
 
   sessionType: Joi.string().valid('INDIVIDUAL', 'GROUP').required(),
-  curriculum: Joi.string().valid('CBC', 'IGCSE').required(),
+  curriculum: Joi.string()
+    .valid('CBC', 'CBE', 'IGCSE', 'GCSE', 'MYP/IB', 'American')
+    .required(),
   subjects: Joi.array().items(Joi.string()).min(1).required(),
 
-  scheduledDate: Joi.date().iso().greater('now').required(),
-  timeSlot: Joi.object({
-    startTime: Joi.string()
-      .pattern(/^([01]\d|2[0-3]):([0-5]\d)$/)
-      .required(),
-    durationMinutes: Joi.number().valid(45, 60, 90).default(45),
-  }).required(),
+  // Canonical UTC instant in ISO 8601, e.g. "2026-05-15T09:35:00.000Z".
+  startAt: Joi.date().iso().greater('now').required(),
+  // IANA timezone the booker is in, e.g. "Africa/Nairobi" / "America/New_York".
+  timezone: Joi.string().min(1).max(64).required(),
+  durationMinutes: Joi.number().valid(45, 60, 90).default(45),
 
   notes: Joi.string().allow('').max(1000),
   isFreeTrialed: Joi.boolean().default(true),
@@ -64,4 +64,24 @@ const loginSchema = Joi.object({
   password: Joi.string().min(6).required(),
 });
 
-module.exports = { createBookingSchema, contactSchema, loginSchema };
+const forgotPasswordSchema = Joi.object({
+  email: Joi.string().email().required(),
+});
+
+const resetPasswordSchema = Joi.object({
+  token: Joi.string().required(),
+  password: Joi.string()
+    .min(8)
+    .required()
+    .messages({
+      'string.min': 'Password must be at least 8 characters',
+    }),
+});
+
+module.exports = {
+  createBookingSchema,
+  contactSchema,
+  loginSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+};

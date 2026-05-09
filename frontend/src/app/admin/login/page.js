@@ -63,13 +63,21 @@ export default function AdminLoginPage() {
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   className="input-field pl-10"
-                  placeholder="joantheresa26@gmail.com"
+                  placeholder="info@jivtutoring.com"
                 />
               </div>
             </div>
 
             <div>
-              <label className="label-field">Password</label>
+              <div className="flex items-center justify-between">
+                <label className="label-field">Password</label>
+                <Link
+                  href="/admin/forgot-password"
+                  className="text-xs font-semibold text-gold-700 hover:text-gold-800"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-navy-400" />
                 <input

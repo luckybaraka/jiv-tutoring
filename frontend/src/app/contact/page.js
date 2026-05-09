@@ -41,8 +41,9 @@ export default function ContactPage() {
             Get in <span className="gradient-text">Touch</span>
           </h1>
           <p className="text-navy-100 text-lg max-w-3xl mx-auto">
-            Have a question? Need guidance choosing the right service? Reach out
-            — we usually respond within a few hours.
+            Have a question? Need guidance choosing the right service? Reach
+            out anytime — our team is available 24/7 and we usually respond
+            within minutes.
           </p>
         </div>
       </section>
@@ -63,7 +64,7 @@ export default function ContactPage() {
                   label: 'Call Us',
                   value: '+254 726 555 444',
                   href: 'tel:+254726555444',
-                  desc: 'Available Mon–Sat, 8am – 6pm',
+                  desc: 'Available 24 hours, every day',
                 },
                 {
                   icon: MessageCircle,
@@ -76,9 +77,9 @@ export default function ContactPage() {
                 {
                   icon: Mail,
                   label: 'Email',
-                  value: 'joantheresa26@gmail.com',
-                  href: 'mailto:joantheresa26@gmail.com',
-                  desc: "We'll reply within 24 hours",
+                  value: 'info@jivtutoring.com',
+                  href: 'mailto:info@jivtutoring.com',
+                  desc: "Replies typically within an hour",
                 },
                 {
                   icon: MapPin,

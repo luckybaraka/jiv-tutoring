@@ -36,7 +36,7 @@ const wrapper = (innerContent, preheader = '') => `
           <tr>
             <td style="background:#0a2e6f;color:#cbd5e1;padding:20px 32px;font-size:12px;text-align:center;">
               <p style="margin:0 0 6px;">JIV Tutoring Services • Nairobi, Kenya</p>
-              <p style="margin:0;">📞 +254 726 555 444 &nbsp;|&nbsp; ✉️ joantheresa26@gmail.com</p>
+              <p style="margin:0;">📞 +254 726 555 444 &nbsp;|&nbsp; ✉️ info@jivtutoring.com</p>
             </td>
           </tr>
         </table>
@@ -60,11 +60,13 @@ const formatStudents = (students) =>
     .join('');
 
 const adminBookingTemplate = (booking) => {
-  const date = new Date(booking.scheduledDate).toLocaleDateString('en-KE', {
+  const tz = booking.timezone || 'Africa/Nairobi';
+  const date = new Date(booking.startAt || booking.scheduledDate).toLocaleDateString('en-KE', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric',
+    timeZone: tz,
   });
 
   const inner = `
@@ -89,7 +91,7 @@ const adminBookingTemplate = (booking) => {
       <tr><td><strong>Curriculum:</strong></td><td>${booking.curriculum}</td></tr>
       <tr><td><strong>Subjects:</strong></td><td>${booking.subjects.join(', ')}</td></tr>
       <tr><td><strong>Date:</strong></td><td>${date}</td></tr>
-      <tr><td><strong>Time:</strong></td><td>${booking.timeSlot.startTime} – ${booking.timeSlot.endTime} (${booking.timeSlot.durationMinutes} min)</td></tr>
+      <tr><td><strong>Time:</strong></td><td>${booking.timeSlot.startTime} – ${booking.timeSlot.endTime} (${booking.timeSlot.durationMinutes} min, ${tz})</td></tr>
       <tr><td><strong>Free Trial:</strong></td><td>${booking.isFreeTrialed ? '✅ Yes' : '❌ No'}</td></tr>
       ${booking.notes ? `<tr><td valign="top"><strong>Notes:</strong></td><td>${booking.notes}</td></tr>` : ''}
     </table>
@@ -104,11 +106,13 @@ const adminBookingTemplate = (booking) => {
 };
 
 const parentConfirmationTemplate = (booking) => {
-  const date = new Date(booking.scheduledDate).toLocaleDateString('en-KE', {
+  const tz = booking.timezone || 'Africa/Nairobi';
+  const date = new Date(booking.startAt || booking.scheduledDate).toLocaleDateString('en-KE', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric',
+    timeZone: tz,
   });
 
   const inner = `
@@ -125,7 +129,7 @@ const parentConfirmationTemplate = (booking) => {
         <tr><td><strong>Curriculum:</strong></td><td>${booking.curriculum}</td></tr>
         <tr><td><strong>Subjects:</strong></td><td>${booking.subjects.join(', ')}</td></tr>
         <tr><td><strong>Date:</strong></td><td>${date}</td></tr>
-        <tr><td><strong>Time:</strong></td><td>${booking.timeSlot.startTime} – ${booking.timeSlot.endTime}</td></tr>
+        <tr><td><strong>Time:</strong></td><td>${booking.timeSlot.startTime} – ${booking.timeSlot.endTime} <span style="color:#64748b;">(${tz})</span></td></tr>
         <tr><td><strong>Booking ID:</strong></td><td><code style="background:#fff;padding:2px 6px;border-radius:4px;">${booking.id}</code></td></tr>
       </table>
     </div>
@@ -138,10 +142,42 @@ const parentConfirmationTemplate = (booking) => {
     <p style="font-size:15px;color:#334155;margin-top:24px;">
       Warm regards,<br>
       <strong style="color:#0a2e6f;">The JIV Tutoring Team</strong><br>
-      <em style="color:#64748b;">Led by Joan Theresa, Certified Educator</em>
+      <em style="color:#64748b;">Certified educators · Available 24/7</em>
     </p>
   `;
   return wrapper(inner, 'Your JIV Tutoring booking has been received.');
+};
+
+const passwordResetTemplate = ({ name, resetUrl, ttlMinutes }) => {
+  const inner = `
+    <h2 style="color:#0a2e6f;margin:0 0 12px;">Hello ${name || 'Admin'} 👋,</h2>
+    <p style="font-size:15px;color:#334155;">
+      We received a request to reset the password for your <strong>JIV Tutoring</strong> admin account.
+      Click the button below to set a new password. This link will expire in
+      <strong>${ttlMinutes} minutes</strong>.
+    </p>
+
+    <div style="text-align:center;margin:28px 0;">
+      <a href="${resetUrl}"
+         style="display:inline-block;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#0a2e6f;
+                font-weight:800;text-decoration:none;padding:14px 28px;border-radius:10px;
+                box-shadow:0 4px 14px rgba(251,191,36,0.35);">
+        Reset Password
+      </a>
+    </div>
+
+    <p style="font-size:13px;color:#64748b;">
+      If the button doesn't work, copy and paste this URL into your browser:<br>
+      <a href="${resetUrl}" style="color:#1e40af;word-break:break-all;">${resetUrl}</a>
+    </p>
+
+    <div style="margin-top:24px;padding:14px;background:#fef3c7;border-left:4px solid #fbbf24;border-radius:6px;">
+      <p style="margin:0;font-size:13px;color:#7c2d12;">
+        <strong>Didn't request this?</strong> You can safely ignore this email — your password will stay unchanged.
+      </p>
+    </div>
+  `;
+  return wrapper(inner, 'Reset your JIV Tutoring admin password.');
 };
 
 const contactMessageTemplate = (data) => {
@@ -161,4 +197,5 @@ module.exports = {
   adminBookingTemplate,
   parentConfirmationTemplate,
   contactMessageTemplate,
+  passwordResetTemplate,
 };

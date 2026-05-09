@@ -61,7 +61,7 @@ npm run dev
 
 The server boots on **http://localhost:5000** and:
 - Connects to MongoDB
-- Auto-seeds a default super-admin (`joantheresa26@gmail.com` / value from `ADMIN_DEFAULT_PASSWORD`)
+- Auto-seeds a default super-admin (`info@jivtutoring.com` / value from `ADMIN_DEFAULT_PASSWORD`)
 - Auto-seeds Mon–Sat availability (08:00–18:00)
 
 ## API Endpoints
@@ -92,7 +92,7 @@ The server boots on **http://localhost:5000** and:
 ## Email Behavior
 
 When a parent submits a booking, the server sends **two** emails in parallel:
-1. To **admin** (`joantheresa26@gmail.com`) — full booking details
+1. To **admin** (`info@jivtutoring.com`) — full booking details
 2. To **parent** — confirmation with summary
 
 Both are also visible in the admin dashboard.

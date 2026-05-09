@@ -7,12 +7,16 @@ import {
   GraduationCap,
   Sparkles,
   ArrowRight,
+  ShieldCheck,
+  Clock,
+  Globe2,
+  BookOpen,
 } from 'lucide-react';
 
 export const metadata = {
   title: 'About Us — Our Team of Certified Educators',
   description:
-    'Meet the JIV Tutoring team — certified, passionate teachers led by Joan Theresa. Dedicated to helping every Kenyan child thrive academically.',
+    'JIV Tutoring is a collective of certified, caring educators delivering personalized tutoring and homeschooling across CBC, CBE, IGCSE, GCSE, MYP/IB and American curricula — available 24/7.',
 };
 
 export default function AboutPage() {
@@ -61,11 +65,15 @@ export default function AboutPage() {
                   curiosity, and the lifelong habits of strong learners.
                 </p>
                 <p>
-                  Whether your child is following the{' '}
-                  <strong className="text-navy-900">CBC</strong> or{' '}
-                  <strong className="text-navy-900">IGCSE</strong> curriculum,
-                  is fully homeschooled, or just needs an extra hand with
-                  homework — our team is here to support them.
+                  Whether your child follows the{' '}
+                  <strong className="text-navy-900">CBC</strong>,{' '}
+                  <strong className="text-navy-900">CBE</strong>,{' '}
+                  <strong className="text-navy-900">IGCSE</strong>,{' '}
+                  <strong className="text-navy-900">GCSE</strong>,{' '}
+                  <strong className="text-navy-900">MYP/IB</strong>, or{' '}
+                  <strong className="text-navy-900">American</strong> curriculum
+                  — is fully homeschooled, or just needs a hand with homework
+                  — our team is here, around the clock.
                 </p>
               </div>
             </div>
@@ -110,83 +118,88 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* MEET JOAN */}
+      {/* HOW WE WORK */}
       <section className="section-padding bg-gradient-to-b from-navy-50/40 to-white">
-        <div className="container-custom max-w-5xl">
+        <div className="container-custom max-w-6xl">
           <div className="text-center mb-12">
             <p className="text-gold-600 font-bold uppercase tracking-wider text-sm mb-3">
-              Leading the Team
+              How We Work
             </p>
             <h2 className="font-display text-3xl md:text-4xl font-extrabold text-navy-900">
-              Meet <span className="gradient-text">Joan Theresa</span>
+              A Service Built on <span className="gradient-text">Standards, Not Personalities</span>
             </h2>
+            <p className="mt-4 max-w-3xl mx-auto text-navy-600 text-lg">
+              JIV Tutoring is an organisation, not an individual. Every tutor
+              you meet is held to the same vetting, training, and quality
+              standards — so the experience is consistent, no matter who is
+              teaching your child.
+            </p>
           </div>
 
-          <div className="grid gap-10 lg:grid-cols-5 items-center">
-            <div className="lg:col-span-2">
-              <div className="relative mx-auto max-w-sm">
-                <div className="absolute inset-0 -m-3 rounded-3xl bg-gold-gradient opacity-30 blur-2xl" />
-                <div className="relative aspect-[3/4] rounded-3xl overflow-hidden border-4 border-gold-400 shadow-gold-lg bg-navy-800">
-                  <div className="flex h-full w-full items-center justify-center p-6">
-                    <div className="text-center">
-                      <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-gold-gradient">
-                        <GraduationCap className="h-12 w-12 text-navy-900" strokeWidth={2} />
-                      </div>
-                      <p className="text-gold-300 font-display font-bold text-2xl">
-                        Joan Theresa
-                      </p>
-                      <p className="text-navy-200 text-sm mt-2">
-                        Founder & Lead Educator
-                      </p>
-                      <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-gold-400/20 px-3 py-1 text-xs font-semibold text-gold-300 border border-gold-400/30">
-                        <Award className="h-3 w-3" />
-                        Certified & Dedicated Tutor
-                      </div>
-                    </div>
-                  </div>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                icon: ShieldCheck,
+                title: 'Rigorously Vetted',
+                desc: 'Every educator passes interviews, certification checks, and a teaching demo before joining the team.',
+              },
+              {
+                icon: Globe2,
+                title: 'Curriculum-Trained',
+                desc: 'Our tutors specialise in CBC, CBE, IGCSE, GCSE, MYP/IB, and the American curriculum — matched to your child.',
+              },
+              {
+                icon: Clock,
+                title: 'Always Available',
+                desc: '24/7 booking and tutoring across time zones. Early mornings, late nights, weekends — we are on.',
+              },
+              {
+                icon: Heart,
+                title: 'Quality Assured',
+                desc: 'Sessions are reviewed, parent feedback is tracked, and tutors are continuously coached to maintain excellence.',
+              },
+            ].map((item) => (
+              <div
+                key={item.title}
+                className="card text-center group hover:-translate-y-1"
+              >
+                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gold-gradient group-hover:scale-110 transition-transform">
+                  <item.icon className="h-7 w-7 text-navy-900" strokeWidth={2.5} />
+                </div>
+                <h3 className="font-display font-bold text-navy-900 text-lg mb-2">
+                  {item.title}
+                </h3>
+                <p className="text-navy-600 leading-relaxed text-sm">
+                  {item.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-14 grid gap-6 md:grid-cols-3">
+            {[
+              { code: 'CBC', label: 'Competency-Based Curriculum' },
+              { code: 'CBE', label: 'Competency-Based Education' },
+              { code: 'IGCSE', label: 'Cambridge International' },
+              { code: 'GCSE', label: 'General Certificate (UK)' },
+              { code: 'MYP/IB', label: 'International Baccalaureate' },
+              { code: 'American', label: 'US Curriculum' },
+            ].map((c) => (
+              <div
+                key={c.code}
+                className="rounded-xl border-2 border-navy-100 bg-white p-4 flex items-center gap-3 hover:border-gold-300 transition-colors"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gold-gradient flex-shrink-0">
+                  <BookOpen className="h-5 w-5 text-navy-900" strokeWidth={2.5} />
+                </div>
+                <div>
+                  <p className="font-display font-extrabold text-navy-900">
+                    {c.code}
+                  </p>
+                  <p className="text-xs text-navy-500">{c.label}</p>
                 </div>
               </div>
-            </div>
-
-            <div className="lg:col-span-3 space-y-5 text-navy-700 leading-relaxed text-lg">
-              <p>
-                <strong className="text-navy-900">Joan Theresa</strong> is the
-                founder and lead educator behind JIV Tutoring Services. As a
-                certified teacher with deep experience in both the CBC and IGCSE
-                curricula, Joan has spent years helping children unlock their
-                potential — one lesson at a time.
-              </p>
-              <p>
-                She built JIV Tutoring around a vision of education that is
-                <strong className="text-navy-900"> personal, kind, and effective.</strong>{' '}
-                Today, she leads a team of like-minded educators who share her
-                standards and her heart for children.
-              </p>
-              <p>
-                Joan personally vets every tutor on the JIV team, ensures the
-                quality of every session, and stays directly involved with the
-                families we serve. When you book with JIV, you are joining a
-                community led by someone who genuinely cares about your child's
-                success.
-              </p>
-
-              <div className="flex flex-wrap gap-3 pt-2">
-                {[
-                  'CBC Specialist',
-                  'IGCSE Certified',
-                  'Special Needs Trained',
-                  'Years of Experience',
-                ].map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-gold-100 px-3 py-1.5 text-xs font-bold text-gold-800"
-                  >
-                    <Sparkles className="h-3 w-3" />
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -202,8 +215,9 @@ export default function AboutPage() {
               Teachers Who <span className="gradient-text">Truly Care</span>
             </h2>
             <p className="mt-4 max-w-2xl mx-auto text-navy-600 text-lg">
-              Every educator on the JIV team is hand-picked by Joan and shares
-              our commitment to compassion, professionalism, and results.
+              Every educator on the JIV team is hand-picked through a rigorous
+              process and shares our commitment to compassion,
+              professionalism, and results.
             </p>
           </div>
 
@@ -217,7 +231,7 @@ export default function AboutPage() {
               {
                 icon: GraduationCap,
                 title: 'Curriculum Experts',
-                desc: 'Specialists in CBC, IGCSE, and homeschooling pedagogy — your child is in the right hands.',
+                desc: 'Specialists in CBC, CBE, IGCSE, GCSE, MYP/IB, American curricula and homeschooling pedagogy.',
               },
               {
                 icon: Heart,

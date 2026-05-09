@@ -41,12 +41,22 @@ const bookingSchema = new Schema(
     },
     curriculum: {
       type: String,
-      enum: ['CBC', 'IGCSE'],
+      enum: ['CBC', 'CBE', 'IGCSE', 'GCSE', 'MYP/IB', 'American'],
       required: true,
     },
     subjects: { type: [String], required: true },
+
+    // Canonical UTC instants — source of truth for conflict detection.
+    startAt: { type: Date, required: true, index: true },
+    endAt: { type: Date, required: true, index: true },
+    timezone: { type: String, required: true, default: 'Africa/Nairobi' },
+
+    // Legacy / display-friendly fields, derived server-side from startAt/endAt
+    // and the booker's timezone. Kept for backward compatibility with emails,
+    // admin views, and existing data.
     scheduledDate: { type: Date, required: true, index: true },
     timeSlot: { type: timeSlotSchema, required: true },
+
     notes: { type: String, default: '' },
     isFreeTrialed: { type: Boolean, default: true },
     discountPercentage: { type: Number, default: 0 },
@@ -61,10 +71,10 @@ const bookingSchema = new Schema(
   { timestamps: true }
 );
 
-// Composite index to prevent double bookings
+// Speeds up the overlap query: { status, startAt, endAt }
 bookingSchema.index(
-  { scheduledDate: 1, 'timeSlot.startTime': 1, status: 1 },
-  { name: 'slot_booking_idx' }
+  { status: 1, startAt: 1, endAt: 1 },
+  { name: 'overlap_check_idx' }
 );
 
 module.exports = mongoose.model('Booking', bookingSchema);

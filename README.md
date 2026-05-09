@@ -4,10 +4,10 @@ A production-ready online tutoring & homeschooling platform for Kenyan families.
 Built with **Next.js + Node.js (DDD) + MongoDB**, designed in a premium
 **Blue + Yellow** theme inspired by the brand flyer.
 
-> **Founder & Lead Educator:** Joan Theresa
-> **Team:** A collective of certified, caring teachers led by Joan
-> **Curricula:** CBC + IGCSE
-> **Contact:** +254 726 555 444 · joantheresa26@gmail.com
+> **Team:** A collective of certified, caring educators
+> **Availability:** 24/7
+> **Curricula:** CBC · CBE · IGCSE · GCSE · MYP/IB · American
+> **Contact:** +254 726 555 444 · info@jivtutoring.com
 
 ---
 
@@ -59,7 +59,7 @@ npm run dev                # Starts on http://localhost:3000
 ### 3. Visit
 - **Public site:** http://localhost:3000
 - **Admin login:** http://localhost:3000/admin/login
-   - Default email: `joantheresa26@gmail.com`
+   - Default email: `info@jivtutoring.com`
    - Default password: from `ADMIN_DEFAULT_PASSWORD` in `.env`
 - **API health:** http://localhost:5000/health
 
@@ -70,7 +70,7 @@ npm run dev                # Starts on http://localhost:3000
 ### For Parents (Public Site)
 - Book a **FREE 45-minute trial** in under 2 minutes
 - Choose Individual or Group sessions (2–5 students, auto-discount 10–25%)
-- CBC or IGCSE curriculum support
+- Support across CBC, CBE, IGCSE, GCSE, MYP/IB and American curricula
 - Educational news feed with graceful fallback ("News will be here soon...")
 - WhatsApp floating button, contact form, full mobile responsiveness
 
@@ -82,7 +82,7 @@ npm run dev                # Starts on http://localhost:3000
 
 ### Email System
 Every booking automatically triggers **two parallel emails**:
-1. To **`joantheresa26@gmail.com`** — full booking details
+1. To **`info@jivtutoring.com`** — full booking details
 2. To **the parent** — confirmation with summary
 
 Both use a branded HTML template (Blue + Yellow gradient).

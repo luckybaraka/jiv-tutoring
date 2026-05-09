@@ -3,14 +3,15 @@ const {
   adminBookingTemplate,
   parentConfirmationTemplate,
   contactMessageTemplate,
+  passwordResetTemplate,
 } = require('../templates/email.templates');
 const logger = require('../../../shared/logger');
 
 class NotificationService {
   constructor() {
-    this.adminEmail = process.env.ADMIN_EMAIL || 'joantheresa26@gmail.com';
+    this.adminEmail = process.env.ADMIN_EMAIL || 'info@jivtutoring.com';
     this.fromName = process.env.EMAIL_FROM_NAME || 'JIV Tutoring Services';
-    this.fromAddress = process.env.EMAIL_USER || 'joantheresa26@gmail.com';
+    this.fromAddress = process.env.EMAIL_USER || 'info@jivtutoring.com';
   }
 
   _from() {
@@ -48,6 +49,18 @@ class NotificationService {
       adminSent: results[0].status === 'fulfilled',
       parentSent: results[1].status === 'fulfilled',
     };
+  }
+
+  async sendPasswordReset(admin, resetUrl, ttlMinutes) {
+    return this._send({
+      to: admin.email,
+      subject: '🔑 Reset your JIV Tutoring admin password',
+      html: passwordResetTemplate({
+        name: admin.name,
+        resetUrl,
+        ttlMinutes,
+      }),
+    });
   }
 
   async sendContactMessage(data) {

@@ -10,13 +10,24 @@ import {
   ShieldCheck,
   Trophy,
   Clock,
+  Globe2,
+  GraduationCap,
 } from 'lucide-react';
 
 export const metadata = {
   title: 'JIV Tutoring Services — Online Tutoring & Homeschooling in Kenya',
   description:
-    'Help your child learn with confidence. Certified, caring tutors for CBC and IGCSE. Book a FREE 45-minute trial today.',
+    'Help your child learn with confidence. Certified, caring tutors for CBC, CBE, IGCSE, GCSE, MYP/IB and American curricula. Available 24/7. Book a FREE 45-minute trial today.',
 };
+
+const CURRICULA = [
+  { code: 'CBC', name: 'Competency-Based Curriculum', region: 'Kenya' },
+  { code: 'CBE', name: 'Competency-Based Education', region: 'Kenya' },
+  { code: 'IGCSE', name: 'Cambridge International', region: 'International' },
+  { code: 'GCSE', name: 'General Certificate', region: 'UK' },
+  { code: 'MYP/IB', name: 'International Baccalaureate', region: 'International' },
+  { code: 'American', name: 'US Curriculum', region: 'USA' },
+];
 
 export default function HomePage() {
   return (
@@ -32,7 +43,7 @@ export default function HomePage() {
             <div className="animate-fade-in">
               <div className="inline-flex items-center gap-2 rounded-full bg-gold-400/15 px-4 py-1.5 text-sm font-semibold text-gold-300 mb-6 border border-gold-400/30">
                 <Sparkles className="h-4 w-4" />
-                Certified, caring teachers · Led by Joan Theresa
+                Certified team · Available 24/7
               </div>
               <h1 className="font-display text-4xl font-extrabold leading-tight sm:text-5xl lg:text-6xl">
                 Online Tutoring{' '}
@@ -45,9 +56,10 @@ export default function HomePage() {
                 <span className="font-semibold text-gold-300">
                   certified, caring, and experienced teachers
                 </span>{' '}
-                to support your child's learning? We provide personalized online
-                and home-based tutoring to help children learn with confidence
-                and achieve academic success.
+                to support your child's learning? We deliver personalized,
+                round-the-clock tutoring across all major curricula — helping
+                every learner build confidence and achieve real academic
+                results.
               </p>
 
               <div className="mt-8 flex flex-wrap gap-4">
@@ -63,8 +75,8 @@ export default function HomePage() {
               <div className="mt-10 flex flex-wrap items-center gap-6 text-sm">
                 {[
                   { icon: ShieldCheck, label: 'Certified Tutors' },
-                  { icon: Trophy, label: 'CBC & IGCSE' },
-                  { icon: Clock, label: 'Flexible Schedule' },
+                  { icon: Globe2, label: 'All Major Curricula' },
+                  { icon: Clock, label: '24/7 Availability' },
                 ].map((item) => (
                   <div
                     key={item.label}
@@ -114,11 +126,11 @@ export default function HomePage() {
                 <div className="absolute -top-4 -right-2 rounded-2xl bg-white p-4 shadow-xl border border-navy-200">
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-navy-100">
-                      <CheckCircle2 className="h-5 w-5 text-navy-600" />
+                      <Clock className="h-5 w-5 text-navy-600" />
                     </div>
                     <div>
-                      <p className="text-navy-900 font-bold text-sm">FREE Trial</p>
-                      <p className="text-xs text-navy-500">45 Minutes</p>
+                      <p className="text-navy-900 font-bold text-sm">24/7 Available</p>
+                      <p className="text-xs text-navy-500">Any time zone</p>
                     </div>
                   </div>
                 </div>
@@ -134,8 +146,8 @@ export default function HomePage() {
           {[
             { value: '500+', label: 'Students Helped' },
             { value: '50+', label: 'Certified Teachers' },
-            { value: '95%', label: 'Parent Satisfaction' },
-            { value: '24/7', label: 'Parent Support' },
+            { value: '6', label: 'Curricula Covered' },
+            { value: '24/7', label: 'Tutoring Availability' },
           ].map((stat) => (
             <div key={stat.label} className="text-center">
               <div className="text-3xl md:text-4xl font-extrabold gradient-text font-display">
@@ -213,8 +225,59 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* HOW IT WORKS */}
+      {/* CURRICULA WE COVER */}
       <section className="section-padding bg-white">
+        <div className="container-custom">
+          <div className="text-center mb-12">
+            <p className="text-gold-600 font-bold uppercase tracking-wider text-sm mb-3">
+              Curricula We Cover
+            </p>
+            <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-navy-900">
+              One Team, <span className="gradient-text">Every Curriculum</span>
+            </h2>
+            <p className="mt-4 max-w-2xl mx-auto text-navy-600 text-lg">
+              From Kenyan classrooms to international standards — our tutors
+              are trained across the world's leading curricula so your child
+              never has to switch schools to switch teachers.
+            </p>
+          </div>
+
+          <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+            {CURRICULA.map((c) => (
+              <div
+                key={c.code}
+                className="group relative rounded-2xl border-2 border-navy-100 bg-gradient-to-br from-white to-navy-50/40 p-5 text-center hover:border-gold-300 hover:-translate-y-1 hover:shadow-lg transition-all"
+              >
+                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gold-gradient group-hover:scale-110 transition-transform">
+                  <GraduationCap className="h-6 w-6 text-navy-900" strokeWidth={2.5} />
+                </div>
+                <p className="font-display font-extrabold text-navy-900 text-base">
+                  {c.code}
+                </p>
+                <p className="text-[11px] text-navy-500 mt-1 leading-tight">
+                  {c.name}
+                </p>
+                <p className="text-[10px] text-gold-600 font-bold uppercase tracking-wider mt-2">
+                  {c.region}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10 text-center">
+            <Link
+              href="/what-we-do"
+              className="inline-flex items-center gap-2 text-navy-700 hover:text-gold-600 font-semibold transition-colors"
+            >
+              See full subject coverage
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section className="section-padding bg-navy-50/30">
         <div className="container-custom">
           <div className="text-center mb-14">
             <p className="text-gold-600 font-bold uppercase tracking-wider text-sm mb-3">
@@ -289,7 +352,7 @@ export default function HomePage() {
               },
               {
                 quote:
-                  "The group sessions are amazing — my twins learn together and the discount makes it affordable. Joan's team is exceptional.",
+                  "The group sessions are amazing — my twins learn together and the discount makes it affordable. The JIV team is exceptional.",
                 name: 'Grace M.',
                 role: 'Parent of twins',
               },

@@ -68,7 +68,8 @@ export default function Footer() {
               <li>Group Tutoring (2–5)</li>
               <li>Homework Assistance</li>
               <li>Special Needs Support</li>
-              <li>CBC & IGCSE Curriculum</li>
+              <li>CBC · CBE · IGCSE · GCSE</li>
+              <li>MYP/IB · American Curriculum</li>
             </ul>
           </div>
 
@@ -86,10 +87,10 @@ export default function Footer() {
               <li className="flex items-start gap-2">
                 <Mail className="h-4 w-4 mt-0.5 text-gold-400 flex-shrink-0" />
                 <a
-                  href="mailto:joantheresa26@gmail.com"
+                  href="mailto:info@jivtutoring.com"
                   className="hover:text-gold-300 break-all"
                 >
-                  joantheresa26@gmail.com
+                  info@jivtutoring.com
                 </a>
               </li>
               <li className="flex items-start gap-2">
@@ -103,7 +104,7 @@ export default function Footer() {
         <div className="mt-12 border-t border-navy-700 pt-6 text-center text-sm text-navy-200">
           <p>
             © {new Date().getFullYear()} JIV Tutoring Services. All rights reserved.
-            <span className="hidden sm:inline"> · Led by Joan Theresa, Certified Educator.</span>
+            <span className="hidden sm:inline"> · A team of certified, caring educators.</span>
           </p>
         </div>
       </div>
