@@ -1,0 +1,75 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-white text-navy-900 antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+  h1, h2, h3, h4 {
+    @apply font-display;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full
+      bg-gold-gradient px-7 py-3.5 font-bold text-navy-900
+      shadow-gold transition-all duration-300
+      hover:shadow-gold-lg hover:scale-[1.02] active:scale-[0.98];
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full
+      border-2 border-gold-400 bg-transparent px-7 py-3.5 font-semibold text-gold-300
+      transition-all duration-300 hover:bg-gold-400 hover:text-navy-900;
+  }
+  .btn-outline-navy {
+    @apply inline-flex items-center justify-center gap-2 rounded-full
+      border-2 border-navy-700 bg-transparent px-6 py-3 font-semibold text-navy-700
+      transition-all duration-300 hover:bg-navy-700 hover:text-white;
+  }
+
+  .container-custom {
+    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .section-padding {
+    @apply py-16 sm:py-20 lg:py-24;
+  }
+
+  .input-field {
+    @apply w-full rounded-xl border-2 border-navy-100 bg-white px-4 py-3
+      text-navy-900 placeholder-navy-300 transition-all
+      focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-200;
+  }
+
+  .label-field {
+    @apply mb-1.5 block text-sm font-semibold text-navy-800;
+  }
+
+  .card {
+    @apply rounded-2xl bg-white p-6 shadow-md transition-all duration-300 hover:shadow-xl;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-gold-300 to-gold-500 bg-clip-text text-transparent;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #1e40af, #fbbf24);
+  border-radius: 8px;
+}
