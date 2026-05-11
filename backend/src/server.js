@@ -8,11 +8,11 @@ const PORT = process.env.PORT || 5000;
 const startServer = async () => {
   try {
     await connectDatabase();
-    logger.info('✅ Database connected successfully');
+    logger.info('Database connected successfully');
 
     app.listen(PORT, () => {
-      logger.info(`🚀 JIV Tutoring API running on port ${PORT}`);
-      logger.info(`📚 Environment: ${process.env.NODE_ENV}`);
+      logger.info(` JIV Tutoring API running on port ${PORT}`);
+      logger.info(` Environment: ${process.env.NODE_ENV}`);
     });
   } catch (error) {
     logger.error('❌ Failed to start server:', error);
