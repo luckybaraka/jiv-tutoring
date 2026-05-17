@@ -19,10 +19,26 @@ const app = express();
 app.use(helmet());
 app.use(compression());
 
-// CORS
+// CORS — supports comma-separated origins and tolerates trailing slashes.
+// Also allows Vercel preview deployments (*.vercel.app) when ALLOW_VERCEL_PREVIEWS=true.
+const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:3000')
+  .split(',')
+  .map((s) => s.trim().replace(/\/$/, ''))
+  .filter(Boolean);
+
+const allowVercelPreviews = process.env.ALLOW_VERCEL_PREVIEWS === 'true';
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      const cleaned = origin.replace(/\/$/, '');
+      if (allowedOrigins.includes(cleaned)) return callback(null, true);
+      if (allowVercelPreviews && /^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(cleaned)) {
+        return callback(null, true);
+      }
+      return callback(new Error(`Origin ${origin} not allowed by CORS`));
+    },
     credentials: true,
   })
 );
