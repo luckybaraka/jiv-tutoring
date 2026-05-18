@@ -83,9 +83,9 @@ export default function ContactPage() {
                 },
                 {
                   icon: MapPin,
-                  label: 'Location',
-                  value: 'Nairobi, Kenya',
-                  desc: 'Online & in-home sessions',
+                  label: 'Where We Serve',
+                  value: 'Worldwide',
+                  desc: 'Online sessions globally · in-home where available',
                 },
               ].map((item) => (
                 <a
@@ -159,7 +159,7 @@ export default function ContactPage() {
                         value={form.phone}
                         onChange={handleChange}
                         className="input-field"
-                        placeholder="0726555444"
+                        placeholder="+1 555 123 4567"
                       />
                     </div>
                   </div>

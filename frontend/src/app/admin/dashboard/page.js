@@ -118,11 +118,11 @@ export default function AdminDashboardPage() {
 
   const adminTimezone =
     typeof window !== 'undefined'
-      ? Intl.DateTimeFormat().resolvedOptions().timeZone || 'Africa/Nairobi'
-      : 'Africa/Nairobi';
+      ? Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
+      : 'UTC';
 
   const formatDate = (iso) =>
-    new Date(iso).toLocaleDateString('en-KE', {
+    new Date(iso).toLocaleDateString(undefined, {
       year: 'numeric', month: 'short', day: 'numeric',
       timeZone: adminTimezone,
     });

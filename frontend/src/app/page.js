@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 export const metadata = {
-  title: 'JIV Tutoring Services — Online Tutoring & Homeschooling in Kenya',
+  title: 'JIV Tutoring Services — Online Tutoring & Homeschooling Worldwide',
   description:
     'Help your child learn with confidence. Certified, caring tutors for CBC, CBE, IGCSE, GCSE, MYP/IB and American curricula. Available 24/7. Book a FREE 45-minute trial today.',
 };
@@ -118,7 +118,7 @@ export default function HomePage() {
                     </div>
                     <div>
                       <p className="text-navy-900 font-bold text-sm">100% Trusted</p>
-                      <p className="text-xs text-navy-500">By Kenyan Parents</p>
+                      <p className="text-xs text-navy-500">By Parents Worldwide</p>
                     </div>
                   </div>
                 </div>
@@ -236,7 +236,7 @@ export default function HomePage() {
               One Team, <span className="gradient-text">Every Curriculum</span>
             </h2>
             <p className="mt-4 max-w-2xl mx-auto text-navy-600 text-lg">
-              From Kenyan classrooms to international standards — our tutors
+              From national curricula to international standards — our tutors
               are trained across the world's leading curricula so your child
               never has to switch schools to switch teachers.
             </p>

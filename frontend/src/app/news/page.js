@@ -31,7 +31,7 @@ export default function NewsPage() {
 
   const formatDate = (iso) => {
     try {
-      return new Date(iso).toLocaleDateString('en-KE', {
+      return new Date(iso).toLocaleDateString(undefined, {
         year: 'numeric',
         month: 'short',
         day: 'numeric',

@@ -56,7 +56,7 @@ export default function AboutPage() {
                   JIV Tutoring Services was founded with a simple but powerful idea —
                   that learning should be personal, patient, and inspiring. Today,
                   we are a growing team of certified educators serving families
-                  across Kenya through both online and in-home tutoring.
+                  worldwide through both online and in-home tutoring.
                 </p>
                 <p>
                   Every teacher on our team shares the same commitment: to listen
@@ -83,12 +83,12 @@ export default function AboutPage() {
                 {
                   icon: Heart,
                   title: 'Our Mission',
-                  desc: 'To empower every child in Kenya to learn with confidence, joy, and purpose — through personalized education delivered by teachers who truly care.',
+                  desc: 'To empower every child to learn with confidence, joy, and purpose — through personalized education delivered by teachers who truly care.',
                 },
                 {
                   icon: Target,
                   title: 'Our Vision',
-                  desc: 'A Kenya where no child falls behind because of how they learn — where every learner has access to compassionate, certified educators who meet them where they are.',
+                  desc: 'A world where no child falls behind because of how they learn — where every learner has access to compassionate, certified educators who meet them where they are.',
                 },
                 {
                   icon: Award,

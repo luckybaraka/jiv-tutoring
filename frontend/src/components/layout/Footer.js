@@ -28,7 +28,7 @@ export default function Footer() {
               </div>
             </Link>
             <p className="text-sm text-navy-100 leading-relaxed">
-              Empowering learners across Kenya with personalized tutoring
+              Empowering learners worldwide with personalized tutoring
               and homeschooling, delivered by certified, caring teachers.
             </p>
           </div>
@@ -95,7 +95,7 @@ export default function Footer() {
               </li>
               <li className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 mt-0.5 text-gold-400 flex-shrink-0" />
-                <span>Nairobi, Kenya</span>
+                <span>Serving families worldwide</span>
               </li>
             </ul>
           </div>

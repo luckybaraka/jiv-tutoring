@@ -146,9 +146,9 @@ export default function WhatWeDoPage() {
               Every Major Curriculum, <span className="gradient-text">Done Right</span>
             </h2>
             <p className="mt-4 max-w-2xl mx-auto text-navy-600 text-lg">
-              From local Kenyan systems to international standards — our
-              tutors are certified across the curricula that matter to your
-              family.
+              From national curricula to international standards — our
+              tutors are certified across the systems that matter to your
+              family, wherever you are in the world.
             </p>
           </div>
 

@@ -23,12 +23,12 @@ import { api } from '@/lib/api';
 
 const SESSION_DURATION_MINUTES = 45;
 
-/** Detect the visitor's IANA timezone (e.g. "Africa/Nairobi", "America/New_York"). */
+/** Detect the visitor's IANA timezone (e.g. "America/New_York", "Europe/London"). */
 function detectTimezone() {
   try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Africa/Nairobi';
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
   } catch {
-    return 'Africa/Nairobi';
+    return 'UTC';
   }
 }
 
@@ -142,7 +142,7 @@ export default function BookPage() {
   const [submitting, setSubmitting] = useState(false);
   const [completedBooking, setCompletedBooking] = useState(null);
 
-  const [timezone, setTimezone] = useState('Africa/Nairobi');
+  const [timezone, setTimezone] = useState('UTC');
   const [availability, setAvailability] = useState({
     state: 'idle', // idle | checking | available | conflict | error
     conflict: null,
@@ -284,8 +284,8 @@ export default function BookPage() {
         toast.error('Please enter a valid email');
         return false;
       }
-      if (!/^(\+?254|0)(7|1)\d{8}$/.test(p.phone.replace(/\s+/g, ''))) {
-        toast.error('Please enter a valid Kenyan phone (e.g. 0726555444)');
+      if (!/^\+?[0-9\s\-().]{7,20}$/.test(p.phone)) {
+        toast.error('Please enter a valid phone number with country code (e.g. +1 555 123 4567)');
         return false;
       }
     }
@@ -399,7 +399,7 @@ export default function BookPage() {
               </p>
               <p className="text-sm text-navy-700 mt-1">
                 <strong>Date:</strong>{' '}
-                {new Date(completedBooking.startAt || completedBooking.scheduledDate).toLocaleDateString('en-KE', {
+                {new Date(completedBooking.startAt || completedBooking.scheduledDate).toLocaleDateString(undefined, {
                   weekday: 'long',
                   year: 'numeric',
                   month: 'long',
@@ -594,7 +594,7 @@ export default function BookPage() {
                   <input
                     type="text"
                     className="input-field"
-                    placeholder="e.g. Mary Wanjiku"
+                    placeholder="e.g. Jane Smith"
                     value={data.parent.fullName}
                     onChange={(e) => updateParent('fullName', e.target.value)}
                   />
@@ -616,12 +616,12 @@ export default function BookPage() {
                     <input
                       type="tel"
                       className="input-field"
-                      placeholder="0726555444"
+                      placeholder="+1 555 123 4567"
                       value={data.parent.phone}
                       onChange={(e) => updateParent('phone', e.target.value)}
                     />
                     <p className="text-xs text-navy-500 mt-1">
-                      Kenyan format: 0726555444 or +254726555444
+                      Include your country code (e.g. +1, +44, +254)
                     </p>
                   </div>
                 </div>
