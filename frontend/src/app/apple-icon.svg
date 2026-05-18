@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a1f5a"/>
+      <stop offset="100%" stop-color="#1e3a8a"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fde68a"/>
+      <stop offset="55%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <radialGradient id="shine" cx="30%" cy="25%" r="70%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="180" height="180" rx="40" fill="url(#bg)"/>
+  <rect width="180" height="180" rx="40" fill="url(#shine)"/>
+
+  <g transform="translate(26 26) scale(2.0625)">
+    <!-- Graduation cap mortarboard -->
+    <path d="M 32 16 L 53 25 L 32 34 L 11 25 Z" fill="url(#gold)"/>
+
+    <!-- Cap base / band -->
+    <path d="M 20 28.5 L 20 38 C 20 41 25 44 32 44 C 39 44 44 41 44 38 L 44 28.5 L 32 34 Z"
+          fill="url(#gold)" opacity="0.95"/>
+
+    <!-- Tassel string -->
+    <path d="M 51 26 L 51 39" stroke="#fde68a" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+
+    <!-- Tassel knot -->
+    <circle cx="51" cy="26" r="1.6" fill="#fef3c7"/>
+
+    <!-- Tassel fringe -->
+    <path d="M 51 39 L 49.5 44 M 51 39 L 51 44 M 51 39 L 52.5 44"
+          stroke="#fde68a" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+
+    <!-- Subtle sparkle -->
+    <circle cx="16" cy="18" r="1.2" fill="#fef3c7" opacity="0.9"/>
+  </g>
+</svg>
