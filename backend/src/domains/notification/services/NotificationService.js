@@ -1,4 +1,5 @@
 const { getTransporter } = require('../../../infrastructure/email/transporter');
+const { getResend } = require('../../../infrastructure/email/resendClient');
 const {
   adminBookingTemplate,
   parentConfirmationTemplate,
@@ -11,7 +12,8 @@ class NotificationService {
   constructor() {
     this.adminEmail = process.env.ADMIN_EMAIL || 'info@jivtutoring.com';
     this.fromName = process.env.EMAIL_FROM_NAME || 'JIV Tutoring Services';
-    this.fromAddress = process.env.EMAIL_USER || 'info@jivtutoring.com';
+    this.fromAddress =
+      process.env.RESEND_FROM || process.env.EMAIL_USER || 'info@jivtutoring.com';
   }
 
   _from() {
@@ -73,6 +75,34 @@ class NotificationService {
   }
 
   async _send({ to, subject, html, replyTo }) {
+    if (process.env.RESEND_API_KEY) {
+      return this._sendViaResend({ to, subject, html, replyTo });
+    }
+    return this._sendViaSmtp({ to, subject, html, replyTo });
+  }
+
+  async _sendViaResend({ to, subject, html, replyTo }) {
+    try {
+      const resend = getResend();
+      const { data, error } = await resend.emails.send({
+        from: this._from(),
+        to: Array.isArray(to) ? to : [to],
+        subject,
+        html,
+        replyTo,
+      });
+      if (error) {
+        throw new Error(error.message || JSON.stringify(error));
+      }
+      logger.info(`Email sent via Resend to ${to}: ${data && data.id}`);
+      return data;
+    } catch (err) {
+      logger.error(`Resend send failed to ${to}:`, err.message);
+      throw err;
+    }
+  }
+
+  async _sendViaSmtp({ to, subject, html, replyTo }) {
     try {
       const transporter = getTransporter();
       const info = await transporter.sendMail({
@@ -82,10 +112,10 @@ class NotificationService {
         html,
         replyTo,
       });
-      logger.info(`Email sent to ${to}: ${info.messageId}`);
+      logger.info(`Email sent via SMTP to ${to}: ${info.messageId}`);
       return info;
     } catch (err) {
-      logger.error(`Email send failed to ${to}:`, err.message);
+      logger.error(`SMTP send failed to ${to}:`, err.message);
       throw err;
     }
   }
