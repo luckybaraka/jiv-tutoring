@@ -2,8 +2,6 @@
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 
-const { getTransporter } = require('../src/infrastructure/email/transporter');
-
 const recipient = process.argv[2] || process.env.ADMIN_EMAIL;
 
 if (!recipient) {
@@ -11,8 +9,39 @@ if (!recipient) {
   process.exit(1);
 }
 
+const useResend = !!process.env.RESEND_API_KEY;
+
 (async () => {
-  console.log('SMTP config:');
+  if (useResend) {
+    console.log('Mode: Resend (HTTPS API)');
+    console.log('  from  =', process.env.RESEND_FROM);
+    console.log('  key   =', process.env.RESEND_API_KEY ? '*** set' : '!!! MISSING');
+    console.log('  to    =', recipient);
+
+    try {
+      const { getResend } = require('../src/infrastructure/email/resendClient');
+      const resend = getResend();
+      const fromName = process.env.EMAIL_FROM_NAME || 'JIV Tutoring';
+      const fromAddress = process.env.RESEND_FROM || 'info@jivtutoring.com';
+      const { data, error } = await resend.emails.send({
+        from: `${fromName} <${fromAddress}>`,
+        to: [recipient],
+        subject: 'JIV Tutoring Resend test',
+        html: '<p>If you can read this, booking emails will deliver from production.</p>',
+      });
+      if (error) {
+        console.error('\nResend test FAILED:', error);
+        process.exit(1);
+      }
+      console.log('Sent. id =', data && data.id);
+      process.exit(0);
+    } catch (err) {
+      console.error('\nResend test FAILED:', err.message);
+      process.exit(1);
+    }
+  }
+
+  console.log('Mode: SMTP fallback (no RESEND_API_KEY set)');
   console.log('  host  =', process.env.EMAIL_HOST);
   console.log('  port  =', process.env.EMAIL_PORT);
   console.log('  user  =', process.env.EMAIL_USER);
@@ -20,6 +49,7 @@ if (!recipient) {
   console.log('  to    =', recipient);
 
   try {
+    const { getTransporter } = require('../src/infrastructure/email/transporter');
     const transporter = getTransporter();
     await new Promise((resolve, reject) =>
       transporter.verify((err) => (err ? reject(err) : resolve()))
