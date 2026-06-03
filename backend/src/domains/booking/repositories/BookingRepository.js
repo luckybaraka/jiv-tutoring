@@ -1,5 +1,6 @@
 const BookingModel = require('../../../infrastructure/database/booking.model');
 const { Booking } = require('../entities/Booking');
+const logger = require('../../../shared/logger');
 
 /**
  * Booking Repository (DDD Repository pattern)
@@ -33,7 +34,9 @@ class BookingRepository {
         status: data.status,
         rejectionReason: booking.rejectionReason,
       },
-      { upsert: true, new: true }
+      // runValidators: update ops skip schema validation by default, which is
+      // how documents missing required fields (e.g. parent) slipped into prod.
+      { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true }
     );
     return this._toDomain(doc);
   }
@@ -56,7 +59,20 @@ class BookingRepository {
       .limit(limit)
       .skip(skip);
 
-    return docs.map((d) => this._toDomain(d));
+    // Skip documents that can't be reconstituted (e.g. legacy/corrupt data
+    // missing required fields) instead of failing the whole listing.
+    return docs
+      .map((d) => {
+        try {
+          return this._toDomain(d);
+        } catch (err) {
+          logger.error(
+            `Skipping corrupt booking document ${d.bookingId || d._id}: ${err.message}`
+          );
+          return null;
+        }
+      })
+      .filter(Boolean);
   }
 
   async count(filters = {}) {
@@ -148,24 +164,44 @@ class BookingRepository {
   }
 
   _toDomain(doc) {
+    // Convert the whole document once instead of poking .toObject on each
+    // subdocument — legacy/corrupt docs may be missing parent/timeSlot entirely.
+    const data = typeof doc.toObject === 'function' ? doc.toObject() : doc;
+
+    // Legacy docs predate startAt/endAt: derive them from scheduledDate + timeSlot.
+    let { startAt, endAt } = data;
+    if (!startAt && data.scheduledDate && data.timeSlot) {
+      startAt = this._combineDateAndTime(data.scheduledDate, data.timeSlot.startTime);
+      endAt = this._combineDateAndTime(data.scheduledDate, data.timeSlot.endTime);
+    }
+
     return new Booking({
-      id: doc.bookingId,
-      parent: doc.parent.toObject ? doc.parent.toObject() : doc.parent,
-      students: doc.students.map((s) => (s.toObject ? s.toObject() : s)),
-      sessionType: doc.sessionType,
-      curriculum: doc.curriculum,
-      subjects: doc.subjects,
-      startAt: doc.startAt,
-      endAt: doc.endAt,
-      timezone: doc.timezone,
-      scheduledDate: doc.scheduledDate,
-      timeSlot: doc.timeSlot.toObject ? doc.timeSlot.toObject() : doc.timeSlot,
-      notes: doc.notes,
-      isFreeTrialed: doc.isFreeTrialed,
-      status: doc.status,
-      createdAt: doc.createdAt,
-      updatedAt: doc.updatedAt,
+      id: data.bookingId,
+      parent: data.parent || { fullName: '(missing)', email: '', phone: '' },
+      students: data.students || [],
+      sessionType: data.sessionType,
+      curriculum: data.curriculum,
+      subjects: data.subjects,
+      startAt,
+      endAt,
+      timezone: data.timezone,
+      scheduledDate: data.scheduledDate,
+      timeSlot: data.timeSlot,
+      notes: data.notes,
+      isFreeTrialed: data.isFreeTrialed,
+      status: data.status,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
     });
+  }
+
+  /** Combines a date with an "HH:mm" time string (legacy fallback). */
+  _combineDateAndTime(date, time) {
+    if (!time) return undefined;
+    const [hours, minutes] = time.split(':').map(Number);
+    const combined = new Date(date);
+    combined.setUTCHours(hours, minutes, 0, 0);
+    return combined;
   }
 }
 
